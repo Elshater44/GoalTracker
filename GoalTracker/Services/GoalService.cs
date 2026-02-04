@@ -1,16 +1,16 @@
 ﻿using AutoMapper;
 using GoalTracker.DTOs.GoalDTOs;
 using GoalTracker.Models;
-using GoalTracker.Repositories;
+using GoalTracker.Repositories.Interfaces;
 
 namespace GoalTracker.Services
 {
     public class GoalService
     {
-        private readonly GoalRepository _goalRepository;
+        private readonly IGoalRepository _goalRepository;
         private readonly IMapper _mapper;
 
-        public GoalService(GoalRepository goalRepository, IMapper mapper)
+        public GoalService(IGoalRepository goalRepository, IMapper mapper)
         {
             _goalRepository = goalRepository;
             _mapper = mapper;

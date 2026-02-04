@@ -1,7 +1,6 @@
-﻿using AutoMapper;
+﻿using FluentValidation;
 using GoalTracker.DTOs.GoalTasksDTOs;
-using GoalTracker.Models;
-using GoalTracker.Repositories;
+using GoalTracker.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace GoalTracker.Controllers
@@ -10,110 +9,99 @@ namespace GoalTracker.Controllers
     [ApiController]
     public class GoalTasksController : ControllerBase
     {
-        private readonly GoalTaskRepository _goalTaskRepository;
-        private readonly GoalRepository _goalRepository;
-        private readonly IMapper _mapper;
+        private readonly GoalTaskService _goalTaskService;
+        private readonly IValidator<GoalTaskCreateDto> _goalTaskCreateValidator;
+        private readonly IValidator<GoalTaskUpdateDto> _goalTaskUpdateValidator;
 
-        public GoalTasksController(
-            GoalTaskRepository goalTaskRepository,
-            GoalRepository goalRepository,
-            IMapper mapper)
+        public GoalTasksController(GoalTaskService goalTaskService, IValidator<GoalTaskCreateDto> goalTaskCreateValidator, IValidator<GoalTaskUpdateDto> goalTaskUpdateValidator)
         {
-            _goalTaskRepository = goalTaskRepository;
-            _goalRepository = goalRepository;
-            _mapper = mapper;
-        }
+            _goalTaskService = goalTaskService;
+            _goalTaskCreateValidator = goalTaskCreateValidator;
+            _goalTaskUpdateValidator = goalTaskUpdateValidator;
 
-        [HttpPost]
-        public async Task<ActionResult> CreateGoalTask(
-            GoalTaskCreateDto goalTaskDto,
-            [FromRoute] int goalId)
-        {
-            var goal = await _goalRepository.GetGoalByIdAsync(goalId);
-            if (goal is null)
-                return NotFound($"The goal with id {goalId} is not found");
-
-            var goalTask = _mapper.Map<GoalTask>(goalTaskDto);
-            goalTask.GoalId = goalId;
-
-            await _goalTaskRepository.AddGoalTaskAsync(goalTask);
-            await _goalTaskRepository.SaveChangesAsync();
-
-            return CreatedAtAction(
-                nameof(GetGoalTaskById),
-                new { goalId, goalTaskId = goalTask.Id },
-                _mapper.Map<GoalTaskGetDto>(goalTask)
-            );
         }
 
         [HttpGet]
-        public async Task<ActionResult<List<GoalTaskGetDto>>> GetAllGoalTasks(
-            [FromRoute] int goalId)
+        public async Task<ActionResult<List<GoalTaskGetDto>>> GetAllGoalTasks([FromRoute] int goalId)
         {
-            var goal = await _goalRepository.GetGoalByIdAsync(goalId);
-            if (goal is null)
-                return NotFound($"The goal with id {goalId} is not found");
-
-            var tasks = await _goalTaskRepository.GetAllGoalTasksAsync(goalId);
-            var tasksDto = _mapper.Map<List<GoalTaskGetDto>>(tasks);
-
-            return Ok(tasksDto);
+            var tasks = await _goalTaskService.getAllTasksAsync(goalId);
+            if (tasks is null) return NotFound();
+            return Ok(tasks);
         }
 
         [HttpGet("{goalTaskId}")]
-        public async Task<ActionResult<GoalTaskGetDto>> GetGoalTaskById(
-            [FromRoute] int goalId,
-            [FromRoute] int goalTaskId)
+        public async Task<ActionResult<GoalTaskGetDto>> GetGoalTaskById([FromRoute] int goalId, [FromRoute] int goalTaskId)
         {
-            var goal = await _goalRepository.GetGoalByIdAsync(goalId);
-            if (goal is null)
-                return NotFound($"The goal with id {goalId} is not found");
+            var task = await _goalTaskService.GetGoalTaskByIdAsync(goalId, goalTaskId);
 
-            var goalTask = await _goalTaskRepository.GetGoalTaskAsync(goalId, goalTaskId);
-            if (goalTask is null)
-                return NotFound($"The GoalTask with id {goalTaskId} is not found");
+            if (task == null)
+                return NotFound($"GoalTask {goalTaskId} not found for Goal {goalId}");
 
-            return Ok(_mapper.Map<GoalTaskGetDto>(goalTask));
+            return Ok(task);
+        }
+
+        [HttpPost]
+        public async Task<ActionResult<GoalTaskGetDto>> CreateGoalTask([FromRoute] int goalId, [FromBody] GoalTaskCreateDto goalTaskDto)
+        {
+            var validationResult = _goalTaskCreateValidator.Validate(goalTaskDto);
+            if (!validationResult.IsValid)
+            {
+                var errors = validationResult.Errors
+               .Select(e => new { e.PropertyName, e.ErrorMessage })
+               .ToList();
+
+                return BadRequest(errors);
+            }
+            var createdTask = await _goalTaskService.CreateGoalTaskAsync(goalId, goalTaskDto);
+
+            if (createdTask == null)
+                return NotFound($"Goal with id {goalId} not found");
+
+            return CreatedAtAction(
+                nameof(GetGoalTaskById),
+                new { goalId = goalId, goalTaskId = createdTask.Id },
+                createdTask
+            );
         }
 
         [HttpPut("{goalTaskId}")]
-        public async Task<ActionResult> UpdateGoalTask(
-            [FromRoute] int goalId,
-            [FromRoute] int goalTaskId,
-            GoalTaskUpdateDto goalTaskUpdateDto)
+        public async Task<ActionResult> UpdateGoalTask([FromRoute] int goalId, [FromRoute] int goalTaskId, [FromBody] GoalTaskUpdateDto goalTaskDto)
         {
-            var goal = await _goalRepository.GetGoalByIdAsync(goalId);
-            if (goal is null)
-                return NotFound($"The goal with id {goalId} is not found");
+            var validationResult = _goalTaskUpdateValidator.Validate(goalTaskDto);
+            if (!validationResult.IsValid)
+            {
+                var errors = validationResult.Errors
+               .Select(e => new { e.PropertyName, e.ErrorMessage })
+               .ToList();
 
-            var goalTask = await _goalTaskRepository.GetGoalTaskAsync(goalId, goalTaskId);
-            if (goalTask is null)
-                return NotFound($"The GoalTask with id {goalTaskId} is not found");
+                return BadRequest(errors);
+            }
+            var success = await _goalTaskService.UpdateGoalTaskAsync(goalId, goalTaskId, goalTaskDto);
 
-            _mapper.Map(goalTaskUpdateDto, goalTask);
-            _goalTaskRepository.UpdateGoalTask(goalTask);
-            await _goalTaskRepository.SaveChangesAsync();
+            if (!success)
+                return NotFound("Target task or goal not found.");
 
             return NoContent();
         }
 
         [HttpPut("{goalTaskId}/complete")]
-        public async Task<ActionResult> UpdateIsCompleteGoalTask(
-            [FromRoute] int goalId,
-            [FromRoute] int goalTaskId,
-            [FromBody] bool isComplete)
+        public async Task<ActionResult> UpdateIsCompleteGoalTask([FromRoute] int goalId, [FromRoute] int goalTaskId, [FromBody] bool isComplete)
         {
-            var goal = await _goalRepository.GetGoalByIdAsync(goalId);
-            if (goal is null)
-                return NotFound($"The goal with id {goalId} is not found");
+            var success = await _goalTaskService.UpdateIsCompleteForGoalTaskAsync(goalId, goalTaskId, isComplete);
 
-            var goalTask = await _goalTaskRepository.GetGoalTaskAsync(goalId, goalTaskId);
-            if (goalTask is null)
-                return NotFound($"The GoalTask with id {goalTaskId} is not found");
+            if (!success)
+                return NotFound("Could not update status. Check IDs.");
 
-            goalTask.IsCompleted = isComplete;
-            _goalTaskRepository.UpdateGoalTask(goalTask);
-            await _goalTaskRepository.SaveChangesAsync();
+            return NoContent();
+        }
+
+        [HttpDelete("{goalTaskId}")]
+        public async Task<ActionResult> DeleteGoalTask([FromRoute] int goalId, [FromRoute] int goalTaskId)
+        {
+            var success = await _goalTaskService.RemoveGoalTaskAsync(goalId, goalTaskId);
+
+            if (!success)
+                return NotFound();
 
             return NoContent();
         }
