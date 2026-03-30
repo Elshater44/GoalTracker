@@ -1,5 +1,4 @@
-﻿using FluentValidation;
-using GoalTracker.DTOs.GoalTasksDTOs;
+﻿using GoalTracker.DTOs.GoalTasksDTOs;
 using GoalTracker.Services;
 using Microsoft.AspNetCore.Mvc;
 
@@ -10,15 +9,10 @@ namespace GoalTracker.Controllers
     public class GoalTasksController : ControllerBase
     {
         private readonly GoalTaskService _goalTaskService;
-        private readonly IValidator<GoalTaskCreateDto> _goalTaskCreateValidator;
-        private readonly IValidator<GoalTaskUpdateDto> _goalTaskUpdateValidator;
 
-        public GoalTasksController(GoalTaskService goalTaskService, IValidator<GoalTaskCreateDto> goalTaskCreateValidator, IValidator<GoalTaskUpdateDto> goalTaskUpdateValidator)
+        public GoalTasksController(GoalTaskService goalTaskService)
         {
             _goalTaskService = goalTaskService;
-            _goalTaskCreateValidator = goalTaskCreateValidator;
-            _goalTaskUpdateValidator = goalTaskUpdateValidator;
-
         }
 
         [HttpGet]
@@ -35,7 +29,7 @@ namespace GoalTracker.Controllers
             var task = await _goalTaskService.GetGoalTaskByIdAsync(goalId, goalTaskId);
 
             if (task == null)
-                return NotFound($"GoalTask {goalTaskId} not found for Goal {goalId}");
+                return NotFound();
 
             return Ok(task);
         }
@@ -43,19 +37,10 @@ namespace GoalTracker.Controllers
         [HttpPost]
         public async Task<ActionResult<GoalTaskGetDto>> CreateGoalTask([FromRoute] int goalId, [FromBody] GoalTaskCreateDto goalTaskDto)
         {
-            var validationResult = _goalTaskCreateValidator.Validate(goalTaskDto);
-            if (!validationResult.IsValid)
-            {
-                var errors = validationResult.Errors
-               .Select(e => new { e.PropertyName, e.ErrorMessage })
-               .ToList();
-
-                return BadRequest(errors);
-            }
             var createdTask = await _goalTaskService.CreateGoalTaskAsync(goalId, goalTaskDto);
 
             if (createdTask == null)
-                return NotFound($"Goal with id {goalId} not found");
+                return NotFound();
 
             return CreatedAtAction(
                 nameof(GetGoalTaskById),
@@ -67,19 +52,10 @@ namespace GoalTracker.Controllers
         [HttpPut("{goalTaskId}")]
         public async Task<ActionResult> UpdateGoalTask([FromRoute] int goalId, [FromRoute] int goalTaskId, [FromBody] GoalTaskUpdateDto goalTaskDto)
         {
-            var validationResult = _goalTaskUpdateValidator.Validate(goalTaskDto);
-            if (!validationResult.IsValid)
-            {
-                var errors = validationResult.Errors
-               .Select(e => new { e.PropertyName, e.ErrorMessage })
-               .ToList();
-
-                return BadRequest(errors);
-            }
             var success = await _goalTaskService.UpdateGoalTaskAsync(goalId, goalTaskId, goalTaskDto);
 
             if (!success)
-                return NotFound("Target task or goal not found.");
+                return NotFound();
 
             return NoContent();
         }
@@ -90,7 +66,7 @@ namespace GoalTracker.Controllers
             var success = await _goalTaskService.UpdateIsCompleteForGoalTaskAsync(goalId, goalTaskId, isComplete);
 
             if (!success)
-                return NotFound("Could not update status. Check IDs.");
+                return NotFound();
 
             return NoContent();
         }

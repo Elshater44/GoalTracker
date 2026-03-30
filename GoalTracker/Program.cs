@@ -7,6 +7,7 @@ using GoalTracker.Repositories.Interfaces;
 using GoalTracker.Services;
 using Microsoft.EntityFrameworkCore;
 using Scalar.AspNetCore;
+using SharpGrip.FluentValidation.AutoValidation.Mvc.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -16,17 +17,25 @@ builder.Services.AddControllers();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+builder.Services.AddProblemDetails();
 builder.Services.AddAutoMapper(cfg => { }, typeof(MappingProfile));
 builder.Services.AddScoped<IGoalRepository, GoalRepository>();
 builder.Services.AddScoped<IGoalTaskRepository, GoalTaskRepository>();
 builder.Services.AddScoped<GoalService>();
 builder.Services.AddScoped<GoalTaskService>();
 builder.Services.AddValidatorsFromAssemblyContaining<GoalCreateValidator>();
+builder.Services.AddFluentValidationAutoValidation();
+
+
 var app = builder.Build();
+
+app.UseExceptionHandler();
+app.UseStatusCodePages();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
+    app.UseDeveloperExceptionPage();
     app.MapOpenApi();
     app.MapScalarApiReference();
 }

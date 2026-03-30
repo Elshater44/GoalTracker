@@ -1,5 +1,4 @@
-﻿using FluentValidation;
-using GoalTracker.DTOs.GoalDTOs;
+﻿using GoalTracker.DTOs.GoalDTOs;
 using GoalTracker.Services;
 using Microsoft.AspNetCore.Mvc;
 
@@ -10,14 +9,10 @@ namespace GoalTracker.Controllers
     public class GoalsController : ControllerBase
     {
         private readonly GoalService _goalService;
-        private readonly IValidator<GoalCreateDto> _goalCreateValidator;
-        private readonly IValidator<GoalUpdateDto> _goalUpdateValidator;
 
-        public GoalsController(GoalService goalService, IValidator<GoalCreateDto> goalCreateValidator, IValidator<GoalUpdateDto> goalUpdateValidator)
+        public GoalsController(GoalService goalService)
         {
             _goalService = goalService;
-            _goalCreateValidator = goalCreateValidator;
-            _goalUpdateValidator = goalUpdateValidator;
         }
 
         // GET: api/goals
@@ -44,24 +39,12 @@ namespace GoalTracker.Controllers
         [HttpPost]
         public async Task<ActionResult> CreateGoal(GoalCreateDto dto)
         {
-            var validationResult = await _goalCreateValidator.ValidateAsync(dto);
-            if (!validationResult.IsValid)
-            {
-                var errors = validationResult.Errors
-                               .Select(e => new { e.PropertyName, e.ErrorMessage })
-                               .ToList();
+            var createdGoal = await _goalService.CreateGoalAsync(dto);
 
-                // Return 400 BadRequest with the list of errors
-                return BadRequest(errors);
-            }
-
-            await _goalService.CreateGoalAsync(dto);
-
-            // Better REST practice than NoContent
             return CreatedAtAction(
                 nameof(GetGoalById),
-                new { id = 0 }, // you don’t return id from service yet
-                null
+                new { id = createdGoal.Id }
+                , createdGoal
             );
         }
 
@@ -69,14 +52,6 @@ namespace GoalTracker.Controllers
         [HttpPut("{id}")]
         public async Task<ActionResult> UpdateGoal(int id, GoalUpdateDto dto)
         {
-            var validationResult = await _goalUpdateValidator.ValidateAsync(dto);
-            if (!validationResult.IsValid)
-            {
-                var errors = validationResult.Errors
-                    .Select(e => new { e.PropertyName, e.ErrorMessage })
-                    .ToList();
-                return BadRequest(errors);
-            }
             var updated = await _goalService.UpdateGoalAsync(id, dto);
 
             if (!updated)

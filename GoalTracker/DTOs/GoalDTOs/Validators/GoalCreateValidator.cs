@@ -7,7 +7,7 @@ namespace GoalTracker.DTOs.GoalDTOs.Validators
     {
         public GoalCreateValidator()
         {
-            RuleFor(g => g.Deadline).GreaterThanOrEqualTo(DateTime.Today);
+            RuleFor(g => g.Deadline).GreaterThanOrEqualTo(DateTime.Now);
             RuleFor(g => g.Name).NotEmpty();
             RuleFor(g => g.Description).NotEmpty();
             RuleFor(g => g.Icon).MaximumLength(50);

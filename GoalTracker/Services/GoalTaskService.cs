@@ -20,7 +20,7 @@ namespace GoalTracker.Services
 
         public async Task<List<GoalTaskGetDto>?> getAllTasksAsync(int goalId)
         {
-            if (await IsGoalExistWithGoalIdAsync(goalId)) return null;
+            if (!await IsGoalExistWithGoalIdAsync(goalId)) return null;
             var goalTasks = await _goalTaskRepository.GetAllGoalTasksAsync(goalId);
             return _mapper.Map<List<GoalTaskGetDto>>(goalTasks);
         }

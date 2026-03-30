@@ -32,11 +32,12 @@ namespace GoalTracker.Services
             return goalDto;
         }
 
-        public async Task CreateGoalAsync(GoalCreateDto goalDto)
+        public async Task<GoalGetDto> CreateGoalAsync(GoalCreateDto goalDto)
         {
             var goal = _mapper.Map<Goal>(goalDto);
             await _goalRepository.AddGoalAsync(goal);
             await _goalRepository.SaveChangesAsync();
+            return _mapper.Map<GoalGetDto>(goal);
         }
 
         public async Task<bool> UpdateGoalAsync(int id, GoalUpdateDto goalDto)
