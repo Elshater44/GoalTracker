@@ -18,44 +18,47 @@ namespace GoalTracker.Controllers
         [HttpGet]
         public async Task<ActionResult<List<GoalTaskGetDto>>> GetAllGoalTasks([FromRoute] int goalId)
         {
-            var tasks = await _goalTaskService.getAllTasksAsync(goalId);
-            if (tasks is null) return NotFound();
-            return Ok(tasks);
+            var result = await _goalTaskService.GetAllTasksAsync(goalId);
+
+            if (!result.IsSuccess)
+                return NotFound(result.Error);
+
+            return Ok(result.Value);
         }
 
         [HttpGet("{goalTaskId}")]
         public async Task<ActionResult<GoalTaskGetDto>> GetGoalTaskById([FromRoute] int goalId, [FromRoute] int goalTaskId)
         {
-            var task = await _goalTaskService.GetGoalTaskByIdAsync(goalId, goalTaskId);
+            var result = await _goalTaskService.GetGoalTaskByIdAsync(goalId, goalTaskId);
 
-            if (task == null)
-                return NotFound();
+            if (!result.IsSuccess)
+                return NotFound(result.Error);
 
-            return Ok(task);
+            return Ok(result.Value);
         }
 
         [HttpPost]
         public async Task<ActionResult<GoalTaskGetDto>> CreateGoalTask([FromRoute] int goalId, [FromBody] GoalTaskCreateDto goalTaskDto)
         {
-            var createdTask = await _goalTaskService.CreateGoalTaskAsync(goalId, goalTaskDto);
+            var result = await _goalTaskService.CreateGoalTaskAsync(goalId, goalTaskDto);
 
-            if (createdTask == null)
-                return NotFound();
+            if (!result.IsSuccess)
+                return NotFound(result.Error);
 
             return CreatedAtAction(
                 nameof(GetGoalTaskById),
-                new { goalId = goalId, goalTaskId = createdTask.Id },
-                createdTask
+                new { goalId = goalId, goalTaskId = result.Value!.Id },
+                result.Value
             );
         }
 
         [HttpPut("{goalTaskId}")]
         public async Task<ActionResult> UpdateGoalTask([FromRoute] int goalId, [FromRoute] int goalTaskId, [FromBody] GoalTaskUpdateDto goalTaskDto)
         {
-            var success = await _goalTaskService.UpdateGoalTaskAsync(goalId, goalTaskId, goalTaskDto);
+            var result = await _goalTaskService.UpdateGoalTaskAsync(goalId, goalTaskId, goalTaskDto);
 
-            if (!success)
-                return NotFound();
+            if (!result.IsSuccess)
+                return NotFound(result.Error);
 
             return NoContent();
         }
@@ -63,10 +66,10 @@ namespace GoalTracker.Controllers
         [HttpPut("{goalTaskId}/complete")]
         public async Task<ActionResult> UpdateIsCompleteGoalTask([FromRoute] int goalId, [FromRoute] int goalTaskId, [FromBody] bool isComplete)
         {
-            var success = await _goalTaskService.UpdateIsCompleteForGoalTaskAsync(goalId, goalTaskId, isComplete);
+            var result = await _goalTaskService.UpdateIsCompleteForGoalTaskAsync(goalId, goalTaskId, isComplete);
 
-            if (!success)
-                return NotFound();
+            if (!result.IsSuccess)
+                return NotFound(result.Error);
 
             return NoContent();
         }
@@ -74,10 +77,10 @@ namespace GoalTracker.Controllers
         [HttpDelete("{goalTaskId}")]
         public async Task<ActionResult> DeleteGoalTask([FromRoute] int goalId, [FromRoute] int goalTaskId)
         {
-            var success = await _goalTaskService.RemoveGoalTaskAsync(goalId, goalTaskId);
+            var result = await _goalTaskService.RemoveGoalTaskAsync(goalId, goalTaskId);
 
-            if (!success)
-                return NotFound();
+            if (!result.IsSuccess)
+                return NotFound(result.Error);
 
             return NoContent();
         }

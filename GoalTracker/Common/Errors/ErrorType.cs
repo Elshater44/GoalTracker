@@ -1,4 +1,4 @@
-﻿namespace GoalTracker.Common
+﻿namespace GoalTracker.Common.Errors
 {
     public enum ErrorType
     {

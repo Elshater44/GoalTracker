@@ -27,24 +27,24 @@ namespace GoalTracker.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<GoalGetDto>> GetGoalById(int id)
         {
-            var goal = await _goalService.GetGoalByIdAsync(id);
+            var result = await _goalService.GetGoalByIdAsync(id);
 
-            if (goal is null)
-                return NotFound();
+            if (!result.IsSuccess)
+                return NotFound(result.Error);
 
-            return Ok(goal);
+            return Ok(result.Value);
         }
 
         // POST api/goals
         [HttpPost]
         public async Task<ActionResult> CreateGoal(GoalCreateDto dto)
         {
-            var createdGoal = await _goalService.CreateGoalAsync(dto);
+            var result = await _goalService.CreateGoalAsync(dto);
 
             return CreatedAtAction(
                 nameof(GetGoalById),
-                new { id = createdGoal.Id }
-                , createdGoal
+                new { id = result.Value!.Id },
+                result.Value
             );
         }
 
@@ -52,10 +52,10 @@ namespace GoalTracker.Controllers
         [HttpPut("{id}")]
         public async Task<ActionResult> UpdateGoal(int id, GoalUpdateDto dto)
         {
-            var updated = await _goalService.UpdateGoalAsync(id, dto);
+            var result = await _goalService.UpdateGoalAsync(id, dto);
 
-            if (!updated)
-                return NotFound();
+            if (!result.IsSuccess)
+                return NotFound(result.Error);
 
             return NoContent();
         }
@@ -64,10 +64,10 @@ namespace GoalTracker.Controllers
         [HttpDelete("{id}")]
         public async Task<ActionResult> DeleteGoal(int id)
         {
-            var deleted = await _goalService.DeleteGoalAsync(id);
+            var result = await _goalService.DeleteGoalAsync(id);
 
-            if (!deleted)
-                return NotFound();
+            if (!result.IsSuccess)
+                return NotFound(result.Error);
 
             return NoContent();
         }

@@ -1,4 +1,6 @@
-﻿namespace GoalTracker.Common
+﻿using GoalTracker.Common.Errors;
+
+namespace GoalTracker.Common.Results
 {
     public record Result<T> : Result
     {

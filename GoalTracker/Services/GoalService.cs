@@ -1,4 +1,6 @@
 ﻿using AutoMapper;
+using GoalTracker.Common.Errors;
+using GoalTracker.Common.Results;
 using GoalTracker.DTOs.GoalDTOs;
 using GoalTracker.Models;
 using GoalTracker.Repositories.Interfaces;
@@ -24,38 +26,51 @@ namespace GoalTracker.Services
             return goalsDto;
         }
 
-        public async Task<GoalGetDto?> GetGoalByIdAsync(int id)
+        public async Task<Result<GoalGetDto>> GetGoalByIdAsync(int id)
         {
             var goal = await _goalRepository.GetGoalByIdAsync(id);
-            if (goal == null) return null;
-            var goalDto = _mapper.Map<GoalGetDto>(goal);
-            return goalDto;
+
+            if (goal is null)
+                return Result<GoalGetDto>.Failure(GoalErrors.NotFound(id));
+
+            return Result<GoalGetDto>.Success(_mapper.Map<GoalGetDto>(goal));
         }
 
-        public async Task<GoalGetDto> CreateGoalAsync(GoalCreateDto goalDto)
+        public async Task<Result<GoalGetDto>> CreateGoalAsync(GoalCreateDto goalDto)
         {
             var goal = _mapper.Map<Goal>(goalDto);
+
             await _goalRepository.AddGoalAsync(goal);
             await _goalRepository.SaveChangesAsync();
-            return _mapper.Map<GoalGetDto>(goal);
+
+            return Result<GoalGetDto>.Success(_mapper.Map<GoalGetDto>(goal));
         }
 
-        public async Task<bool> UpdateGoalAsync(int id, GoalUpdateDto goalDto)
+        public async Task<Result> UpdateGoalAsync(int id, GoalUpdateDto goalDto)
         {
             var goal = await _goalRepository.GetGoalByIdAsync(id);
-            if (goal == null) return false;
+
+            if (goal is null)
+                return Result.Failure(GoalErrors.NotFound(id));
+
             _mapper.Map(goalDto, goal);
+
             await _goalRepository.SaveChangesAsync();
-            return true;
+
+            return Result.Success();
         }
 
-        public async Task<bool> DeleteGoalAsync(int id)
+        public async Task<Result> DeleteGoalAsync(int id)
         {
             var goal = await _goalRepository.GetGoalByIdAsync(id);
-            if (goal == null) return false;
+
+            if (goal is null)
+                return Result.Failure(GoalErrors.NotFound(id));
+
             _goalRepository.RemoveGoal(goal);
             await _goalRepository.SaveChangesAsync();
-            return true;
+
+            return Result.Success();
         }
     }
 }
