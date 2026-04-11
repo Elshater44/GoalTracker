@@ -1,4 +1,5 @@
-﻿using GoalTracker.DTOs.GoalDTOs;
+﻿using GoalTracker.Common.Results.Extensions;
+using GoalTracker.DTOs.GoalDTOs;
 using GoalTracker.Services;
 using Microsoft.AspNetCore.Mvc;
 
@@ -30,7 +31,7 @@ namespace GoalTracker.Controllers
             var result = await _goalService.GetGoalByIdAsync(id);
 
             if (!result.IsSuccess)
-                return NotFound(result.Error);
+                return result.ToProblemResult(this);
 
             return Ok(result.Value);
         }
@@ -40,7 +41,6 @@ namespace GoalTracker.Controllers
         public async Task<ActionResult> CreateGoal(GoalCreateDto dto)
         {
             var result = await _goalService.CreateGoalAsync(dto);
-
             return CreatedAtAction(
                 nameof(GetGoalById),
                 new { id = result.Value!.Id },
@@ -55,7 +55,7 @@ namespace GoalTracker.Controllers
             var result = await _goalService.UpdateGoalAsync(id, dto);
 
             if (!result.IsSuccess)
-                return NotFound(result.Error);
+                return result.ToProblemResult(this);
 
             return NoContent();
         }
@@ -67,7 +67,7 @@ namespace GoalTracker.Controllers
             var result = await _goalService.DeleteGoalAsync(id);
 
             if (!result.IsSuccess)
-                return NotFound(result.Error);
+                return result.ToProblemResult(this);
 
             return NoContent();
         }

@@ -1,4 +1,6 @@
-﻿namespace GoalTracker.Common.Errors
+﻿using GoalTracker.Enums;
+
+namespace GoalTracker.Common.Errors
 {
     public static class GoalErrors
     {

@@ -26,7 +26,6 @@ builder.Services.AddScoped<GoalTaskService>();
 builder.Services.AddValidatorsFromAssemblyContaining<GoalCreateValidator>();
 builder.Services.AddFluentValidationAutoValidation();
 
-
 var app = builder.Build();
 
 app.UseExceptionHandler();

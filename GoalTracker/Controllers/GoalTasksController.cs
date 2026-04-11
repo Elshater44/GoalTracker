@@ -1,4 +1,5 @@
-﻿using GoalTracker.DTOs.GoalTasksDTOs;
+﻿using GoalTracker.Common.Results.Extensions;
+using GoalTracker.DTOs.GoalTasksDTOs;
 using GoalTracker.Services;
 using Microsoft.AspNetCore.Mvc;
 
@@ -21,7 +22,7 @@ namespace GoalTracker.Controllers
             var result = await _goalTaskService.GetAllTasksAsync(goalId);
 
             if (!result.IsSuccess)
-                return NotFound(result.Error);
+                return result.ToProblemResult(this);
 
             return Ok(result.Value);
         }
@@ -32,7 +33,7 @@ namespace GoalTracker.Controllers
             var result = await _goalTaskService.GetGoalTaskByIdAsync(goalId, goalTaskId);
 
             if (!result.IsSuccess)
-                return NotFound(result.Error);
+                return result.ToProblemResult(this);
 
             return Ok(result.Value);
         }
@@ -43,7 +44,7 @@ namespace GoalTracker.Controllers
             var result = await _goalTaskService.CreateGoalTaskAsync(goalId, goalTaskDto);
 
             if (!result.IsSuccess)
-                return NotFound(result.Error);
+                return result.ToProblemResult(this);
 
             return CreatedAtAction(
                 nameof(GetGoalTaskById),
@@ -58,7 +59,7 @@ namespace GoalTracker.Controllers
             var result = await _goalTaskService.UpdateGoalTaskAsync(goalId, goalTaskId, goalTaskDto);
 
             if (!result.IsSuccess)
-                return NotFound(result.Error);
+                return result.ToProblemResult(this);
 
             return NoContent();
         }
@@ -69,7 +70,7 @@ namespace GoalTracker.Controllers
             var result = await _goalTaskService.UpdateIsCompleteForGoalTaskAsync(goalId, goalTaskId, isComplete);
 
             if (!result.IsSuccess)
-                return NotFound(result.Error);
+                return result.ToProblemResult(this);
 
             return NoContent();
         }
@@ -80,7 +81,7 @@ namespace GoalTracker.Controllers
             var result = await _goalTaskService.RemoveGoalTaskAsync(goalId, goalTaskId);
 
             if (!result.IsSuccess)
-                return NotFound(result.Error);
+                return result.ToProblemResult(this);
 
             return NoContent();
         }

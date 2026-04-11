@@ -7,7 +7,7 @@ namespace GoalTracker.Models
         public int Id { get; set; }
         public required string Name { get; set; }
         public required string Description { get; set; }
-        public required UrgencyLevel UregencyLevel { get; set; }
+        public required UrgencyLevel UrgencyLevel { get; set; }
         public string? Icon { get; set; }
         public DateTime? Deadline { get; set; }
         public DateTime? CompletedAt { get; set; }

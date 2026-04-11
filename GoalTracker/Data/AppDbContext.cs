@@ -18,7 +18,7 @@ namespace GoalTracker.Data
         {
 
             modelBuilder.Entity<Goal>().
-                Property(g => g.UregencyLevel)
+                Property(g => g.UrgencyLevel)
                 .HasConversion<string>();
 
             base.OnModelCreating(modelBuilder);
