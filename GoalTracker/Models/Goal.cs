@@ -12,5 +12,7 @@ namespace GoalTracker.Models
         public DateTime? Deadline { get; set; }
         public DateTime? CompletedAt { get; set; }
         public List<GoalTask> GoalTasks { get; set; } = new List<GoalTask>();
+        public required int UserId { get; set; }
+        public required User User { get; set; }
     }
 }

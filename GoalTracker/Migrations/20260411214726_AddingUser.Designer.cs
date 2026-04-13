@@ -4,6 +4,7 @@ using GoalTracker.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace GoalTracker.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260411214726_AddingUser")]
+    partial class AddingUser
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -58,7 +61,7 @@ namespace GoalTracker.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Goals", (string)null);
+                    b.ToTable("Goals");
                 });
 
             modelBuilder.Entity("GoalTracker.Models.GoalTask", b =>
@@ -90,7 +93,7 @@ namespace GoalTracker.Migrations
 
                     b.HasIndex("GoalId");
 
-                    b.ToTable("GoalTasks", (string)null);
+                    b.ToTable("GoalTasks");
                 });
 
             modelBuilder.Entity("GoalTracker.Models.User", b =>
