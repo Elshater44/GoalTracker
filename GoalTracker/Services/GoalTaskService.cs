@@ -20,23 +20,23 @@ namespace GoalTracker.Services
             _goalTaskRepository = goalTasKRepository;
         }
 
-        public async Task<Result<List<GoalTaskGetDto>>> GetAllTasksAsync(int goalId)
+        public async Task<Result<List<GoalTaskGetDto>>> GetAllTasksAsync(int goalId, int userId)
         {
-            if (!await IsGoalExistWithGoalIdAsync(goalId))
+            if (!await IsGoalExistWithGoalIdAsync(goalId, userId))
                 return Result<List<GoalTaskGetDto>>.Failure(GoalTaskErrors.GoalNotFound(goalId));
 
-            var tasks = await _goalTaskRepository.GetAllGoalTasksAsync(goalId);
+            var tasks = await _goalTaskRepository.GetAllGoalTasksAsync(goalId, userId);
             var dtos = _mapper.Map<List<GoalTaskGetDto>>(tasks);
 
             return Result<List<GoalTaskGetDto>>.Success(dtos);
         }
 
-        public async Task<Result<GoalTaskGetDto>> GetGoalTaskByIdAsync(int goalId, int goalTaskId)
+        public async Task<Result<GoalTaskGetDto>> GetGoalTaskByIdAsync(int goalId, int goalTaskId, int userId)
         {
-            if (!await IsGoalExistWithGoalIdAsync(goalId))
+            if (!await IsGoalExistWithGoalIdAsync(goalId, userId))
                 return Result<GoalTaskGetDto>.Failure(GoalTaskErrors.GoalNotFound(goalId));
 
-            var goalTask = await _goalTaskRepository.GetGoalTaskAsync(goalId, goalTaskId);
+            var goalTask = await _goalTaskRepository.GetGoalTaskAsync(goalId, goalTaskId, userId);
 
             if (goalTask is null)
                 return Result<GoalTaskGetDto>.Failure(GoalTaskErrors.NotFound(goalId, goalTaskId));
@@ -44,9 +44,9 @@ namespace GoalTracker.Services
             return Result<GoalTaskGetDto>.Success(_mapper.Map<GoalTaskGetDto>(goalTask));
         }
 
-        public async Task<Result<GoalTaskGetDto>> CreateGoalTaskAsync(int goalId, GoalTaskCreateDto goalTaskDto)
+        public async Task<Result<GoalTaskGetDto>> CreateGoalTaskAsync(int goalId, GoalTaskCreateDto goalTaskDto, int userId)
         {
-            if (!await IsGoalExistWithGoalIdAsync(goalId))
+            if (!await IsGoalExistWithGoalIdAsync(goalId, userId))
                 return Result<GoalTaskGetDto>.Failure(GoalTaskErrors.GoalNotFound(goalId));
 
             var goalTask = _mapper.Map<GoalTask>(goalTaskDto);
@@ -58,12 +58,12 @@ namespace GoalTracker.Services
             return Result<GoalTaskGetDto>.Success(_mapper.Map<GoalTaskGetDto>(goalTask));
         }
 
-        public async Task<Result> UpdateGoalTaskAsync(int goalId, int goalTaskId, GoalTaskUpdateDto goalTaskDto)
+        public async Task<Result> UpdateGoalTaskAsync(int goalId, int goalTaskId, GoalTaskUpdateDto goalTaskDto, int userId)
         {
-            if (!await IsGoalExistWithGoalIdAsync(goalId))
+            if (!await IsGoalExistWithGoalIdAsync(goalId, userId))
                 return Result.Failure(GoalTaskErrors.GoalNotFound(goalId));
 
-            var goalTask = await _goalTaskRepository.GetGoalTaskAsync(goalId, goalTaskId);
+            var goalTask = await _goalTaskRepository.GetGoalTaskAsync(goalId, goalTaskId, userId);
 
             if (goalTask is null)
                 return Result.Failure(GoalTaskErrors.NotFound(goalId, goalTaskId));
@@ -71,17 +71,17 @@ namespace GoalTracker.Services
             _mapper.Map(goalTaskDto, goalTask);
 
             await _goalTaskRepository.SaveChangesAsync();
-            await UpdateGoalCompletionStateAsync(goalId);
+            await UpdateGoalCompletionStateAsync(goalId, userId);
 
             return Result.Success();
         }
 
-        public async Task<Result> RemoveGoalTaskAsync(int goalId, int goalTaskId)
+        public async Task<Result> RemoveGoalTaskAsync(int goalId, int goalTaskId, int userId)
         {
-            if (!await IsGoalExistWithGoalIdAsync(goalId))
+            if (!await IsGoalExistWithGoalIdAsync(goalId, userId))
                 return Result.Failure(GoalTaskErrors.GoalNotFound(goalId));
 
-            var goalTask = await _goalTaskRepository.GetGoalTaskAsync(goalId, goalTaskId);
+            var goalTask = await _goalTaskRepository.GetGoalTaskAsync(goalId, goalTaskId, userId);
 
             if (goalTask is null)
                 return Result.Failure(GoalTaskErrors.NotFound(goalId, goalTaskId));
@@ -89,17 +89,17 @@ namespace GoalTracker.Services
             _goalTaskRepository.DeleteGoalTask(goalTask);
 
             await _goalTaskRepository.SaveChangesAsync();
-            await UpdateGoalCompletionStateAsync(goalId);
+            await UpdateGoalCompletionStateAsync(goalId, userId);
 
             return Result.Success();
         }
 
-        public async Task<Result> UpdateIsCompleteForGoalTaskAsync(int goalId, int goalTaskId, bool isComplete)
+        public async Task<Result> UpdateIsCompleteForGoalTaskAsync(int goalId, int goalTaskId, bool isComplete, int userId)
         {
-            if (!await IsGoalExistWithGoalIdAsync(goalId))
+            if (!await IsGoalExistWithGoalIdAsync(goalId, userId))
                 return Result.Failure(GoalTaskErrors.GoalNotFound(goalId));
 
-            var goalTask = await _goalTaskRepository.GetGoalTaskAsync(goalId, goalTaskId);
+            var goalTask = await _goalTaskRepository.GetGoalTaskAsync(goalId, goalTaskId, userId);
 
             if (goalTask is null)
                 return Result.Failure(GoalTaskErrors.NotFound(goalId, goalTaskId));
@@ -107,20 +107,20 @@ namespace GoalTracker.Services
             goalTask.IsCompleted = isComplete;
 
             await _goalTaskRepository.SaveChangesAsync();
-            await UpdateGoalCompletionStateAsync(goalId);
+            await UpdateGoalCompletionStateAsync(goalId, userId);
 
             return Result.Success();
         }
 
-        private async Task<bool> IsGoalExistWithGoalIdAsync(int goalId)
+        private async Task<bool> IsGoalExistWithGoalIdAsync(int goalId, int userId)
         {
-            var goal = await _goalRepository.GetGoalByIdAsync(goalId);
+            var goal = await _goalRepository.GetGoalByIdAsync(goalId, userId);
             return goal is not null;
         }
 
-        private async Task UpdateGoalCompletionStateAsync(int goalId)
+        private async Task UpdateGoalCompletionStateAsync(int goalId, int userId)
         {
-            var goal = await _goalRepository.GetGoalByIdAsync(goalId);
+            var goal = await _goalRepository.GetGoalByIdAsync(goalId, userId);
 
             if (goal is null)
                 return;

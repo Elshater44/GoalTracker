@@ -14,15 +14,18 @@ namespace GoalTracker.Repositories
             _context = context;
         }
 
-        public async Task<List<GoalTask>> GetAllGoalTasksAsync(int goalId)
+        public async Task<List<GoalTask>> GetAllGoalTasksAsync(int goalId, int userId)
         {
-            var goalTasks = await _context.GoalTasks.Where(gt => gt.GoalId == goalId).ToListAsync();
+            var goalTasks = await _context.GoalTasks
+                .Where(gt => gt.GoalId == goalId && gt.Goal.UserId == userId)
+                .ToListAsync();
             return goalTasks;
         }
 
-        public async Task<GoalTask?> GetGoalTaskAsync(int goalId, int goalTaskId)
+        public async Task<GoalTask?> GetGoalTaskAsync(int goalId, int goalTaskId, int userId)
         {
-            var goalTask = await _context.GoalTasks.FirstOrDefaultAsync(gt => gt.GoalId == goalId && gt.Id == goalTaskId);
+            var goalTask = await _context.GoalTasks
+                .FirstOrDefaultAsync(gt => gt.GoalId == goalId && gt.Id == goalTaskId && gt.Goal.UserId == userId);
             return goalTask;
         }
 

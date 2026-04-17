@@ -6,8 +6,8 @@ namespace GoalTracker.Repositories.Interfaces
     {
         Task AddGoalTaskAsync(GoalTask goalTask);
         void DeleteGoalTask(GoalTask goalTask);
-        Task<List<GoalTask>> GetAllGoalTasksAsync(int goalId);
-        Task<GoalTask?> GetGoalTaskAsync(int goalId, int goalTaskId);
+        Task<List<GoalTask>> GetAllGoalTasksAsync(int goalId, int userId);
+        Task<GoalTask?> GetGoalTaskAsync(int goalId, int goalTaskId, int userId);
         Task SaveChangesAsync();
         void UpdateGoalTask(GoalTask goalTask);
     }
