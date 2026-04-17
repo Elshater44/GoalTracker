@@ -14,14 +14,19 @@ namespace GoalTracker.Repositories
             _context = context;
         }
 
-        public async Task<List<Goal>> GetAllGoalsAsync()
+        public async Task<List<Goal>> GetAllGoalsAsync(int userId)
         {
-            return await _context.Goals.Include(g => g.GoalTasks).ToListAsync();
+            return await _context.Goals
+                .Include(g => g.GoalTasks)
+                .Where(g => g.UserId == userId)
+                .ToListAsync();
         }
 
-        public Task<Goal?> GetGoalByIdAsync(int id)
+        public Task<Goal?> GetGoalByIdAsync(int id, int userId)
         {
-            return _context.Goals.Include(g => g.GoalTasks).FirstOrDefaultAsync(g => g.Id == id);
+            return _context.Goals
+                .Include(g => g.GoalTasks)
+                .FirstOrDefaultAsync(g => g.Id == id && g.UserId == userId);
         }
 
         public async Task AddGoalAsync(Goal goal)
