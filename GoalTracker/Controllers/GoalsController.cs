@@ -19,27 +19,19 @@ namespace GoalTracker.Controllers
             _goalService = goalService;
         }
 
-        // GET: api/goals
+        private int CurrentUserId => int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+
         [HttpGet]
         public async Task<ActionResult<IEnumerable<GoalGetDto>>> GetAllGoals()
         {
-            var userId = GetCurrentUserId();
-            if (userId is null)
-                return Unauthorized();
-
-            var goals = await _goalService.GetAllGoalsAsync(userId.Value);
+            var goals = await _goalService.GetAllGoalsAsync(CurrentUserId);
             return Ok(goals);
         }
 
-        // GET api/goals/5
         [HttpGet("{id}")]
         public async Task<ActionResult<GoalGetDto>> GetGoalById(int id)
         {
-            var userId = GetCurrentUserId();
-            if (userId is null)
-                return Unauthorized();
-
-            var result = await _goalService.GetGoalByIdAsync(id, userId.Value);
+            var result = await _goalService.GetGoalByIdAsync(id, CurrentUserId);
 
             if (!result.IsSuccess)
                 return result.ToProblemResult(this);
@@ -47,15 +39,11 @@ namespace GoalTracker.Controllers
             return Ok(result.Value);
         }
 
-        // POST api/goals
         [HttpPost]
         public async Task<ActionResult> CreateGoal(GoalCreateDto dto)
         {
-            var userId = GetCurrentUserId();
-            if (userId is null)
-                return Unauthorized();
+            var result = await _goalService.CreateGoalAsync(dto, CurrentUserId);
 
-            var result = await _goalService.CreateGoalAsync(dto, userId.Value);
             return CreatedAtAction(
                 nameof(GetGoalById),
                 new { id = result.Value!.Id },
@@ -63,15 +51,10 @@ namespace GoalTracker.Controllers
             );
         }
 
-        // PUT api/goals/5
         [HttpPut("{id}")]
         public async Task<ActionResult> UpdateGoal(int id, GoalUpdateDto dto)
         {
-            var userId = GetCurrentUserId();
-            if (userId is null)
-                return Unauthorized();
-
-            var result = await _goalService.UpdateGoalAsync(id, dto, userId.Value);
+            var result = await _goalService.UpdateGoalAsync(id, dto, CurrentUserId);
 
             if (!result.IsSuccess)
                 return result.ToProblemResult(this);
@@ -79,30 +62,15 @@ namespace GoalTracker.Controllers
             return NoContent();
         }
 
-        // DELETE api/goals/5
         [HttpDelete("{id}")]
         public async Task<ActionResult> DeleteGoal(int id)
         {
-            var userId = GetCurrentUserId();
-            if (userId is null)
-                return Unauthorized();
-
-            var result = await _goalService.DeleteGoalAsync(id, userId.Value);
+            var result = await _goalService.DeleteGoalAsync(id, CurrentUserId);
 
             if (!result.IsSuccess)
                 return result.ToProblemResult(this);
 
             return NoContent();
-        }
-
-        private int? GetCurrentUserId()
-        {
-            var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
-
-            if (string.IsNullOrWhiteSpace(userIdClaim) || !int.TryParse(userIdClaim, out var userId))
-                return null;
-
-            return userId;
         }
     }
 }

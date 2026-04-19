@@ -2,7 +2,6 @@ using GoalTracker.Common.Results.Extensions;
 using GoalTracker.DTOs.AuthDtos;
 using GoalTracker.Models;
 using GoalTracker.Services;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace GoalTracker.Controllers
@@ -45,7 +44,6 @@ namespace GoalTracker.Controllers
         }
 
         [HttpGet("users")]
-        [Authorize]
         public async Task<ActionResult<List<User>>> GetAllUsers()
         {
             var users = await _authService.GetAllUsersAsync();
