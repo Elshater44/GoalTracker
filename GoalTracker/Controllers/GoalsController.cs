@@ -1,5 +1,7 @@
 ﻿using GoalTracker.Common.Results.Extensions;
+using GoalTracker.DTOs.Pagination;
 using GoalTracker.DTOs.GoalDTOs;
+using GoalTracker.DTOs.GoalDTOs.Query;
 using GoalTracker.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -22,10 +24,10 @@ namespace GoalTracker.Controllers
         private int CurrentUserId => int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<GoalGetDto>>> GetAllGoals()
+        public async Task<ActionResult<PagedResponse<GoalGetDto>>> GetGoals([FromQuery] GoalQueryParams queryParams)
         {
-            var goals = await _goalService.GetAllGoalsAsync(CurrentUserId);
-            return Ok(goals);
+            var result = await _goalService.GetGoalsAsync(CurrentUserId, queryParams);
+            return Ok(result);
         }
 
         [HttpGet("{id}")]

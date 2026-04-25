@@ -1,7 +1,9 @@
 ﻿using AutoMapper;
 using GoalTracker.Common.Errors;
 using GoalTracker.Common.Results;
+using GoalTracker.DTOs.Pagination;
 using GoalTracker.DTOs.GoalDTOs;
+using GoalTracker.DTOs.GoalDTOs.Query;
 using GoalTracker.Models;
 using GoalTracker.Repositories.Interfaces;
 
@@ -24,6 +26,23 @@ namespace GoalTracker.Services
             var goalsDto = _mapper.Map<List<GoalGetDto>>(goals);
 
             return goalsDto;
+        }
+
+        public async Task<PagedResponse<GoalGetDto>> GetGoalsAsync(int userId, GoalQueryParams queryParams)
+        {
+            var (items, totalCount) = await _goalRepository.GetGoalsAsync(userId, queryParams);
+            var mappedItems = _mapper.Map<List<GoalGetDto>>(items);
+
+            var totalPages = (int)Math.Ceiling(totalCount / (double)queryParams.PageSize);
+
+            return new PagedResponse<GoalGetDto>
+            {
+                Items = mappedItems,
+                PageNumber = queryParams.PageNumber,
+                PageSize = queryParams.PageSize,
+                TotalPages = totalPages,
+                TotalRecords = totalCount
+            };
         }
 
         public async Task<Result<GoalGetDto>> GetGoalByIdAsync(int id, int userId)
