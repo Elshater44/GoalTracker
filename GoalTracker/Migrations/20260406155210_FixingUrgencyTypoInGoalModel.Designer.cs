@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace GoalTracker.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260406155210_FixingUrgencyTypoInGoalModel")]
-    partial class FixingUrgencyTypoInGoalModel
+    [Migration("20260406155210_FixingUrgencyLevelTypoInGoalModel")]
+    partial class FixingUrgencyLevelTypoInGoalModel
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

@@ -126,7 +126,7 @@ namespace GoalTracker.Services
                 return;
 
             goal.CompletedAt = goal.GoalTasks.Any() && goal.GoalTasks.All(gt => gt.IsCompleted)
-                ? DateTime.Now
+                ? DateTime.UtcNow
                 : null;
 
             await _goalRepository.SaveChangesAsync();

@@ -11,7 +11,7 @@ namespace GoalTracker.DTOs.GoalDTOs.Validators
             RuleFor(g => g.Name).NotEmpty();
             RuleFor(g => g.Description).NotEmpty();
             RuleFor(g => g.Icon).MaximumLength(50);
-            RuleFor(g => g.UregencyLevel)
+            RuleFor(g => g.UrgencyLevel)
             .IsInEnum()
             .WithMessage(dto =>
             {
@@ -19,7 +19,7 @@ namespace GoalTracker.DTOs.GoalDTOs.Validators
                     .Cast<UrgencyLevel>()
                     .Select(e => $"{(int)e} ({e})"); // Creates "1 (Low)", "2 (Medium)", etc.
 
-                return $"Invalid Urgency Level. Valid options are: {string.Join(", ", entries)}";
+                return $"Invalid UrgencyLevel Level. Valid options are: {string.Join(", ", entries)}";
             });
         }
     }

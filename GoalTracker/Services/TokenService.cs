@@ -29,7 +29,7 @@ namespace GoalTracker.Services
                 _config["Jwt:Issuer"],
                 _config["Jwt:Audience"],
                 claims,
-                expires: DateTime.Now.AddHours(2),
+                expires: DateTime.UtcNow.AddHours(2),
                 signingCredentials: creds
             );
             return new JwtSecurityTokenHandler().WriteToken(token);

@@ -48,22 +48,13 @@ namespace GoalTracker.Repositories
             if (queryParams.HasDeadline.HasValue)
                 query = query.Where(g => g.Deadline.HasValue == queryParams.HasDeadline);
 
-            // Apply IsOverdue filter (deadline passed but not completed)
-            if (queryParams.IsOverdue.HasValue)
-            {
-                if (queryParams.IsOverdue.Value)
-                    query = query.Where(g => g.Deadline.HasValue && g.Deadline < DateTime.Now && !g.CompletedAt.HasValue);
-                else
-                    query = query.Where(g => !g.Deadline.HasValue || g.Deadline >= DateTime.Now || g.CompletedAt.HasValue);
-            }
-
             // Apply IsMissed filter (same logic as IsOverdue)
             if (queryParams.IsMissed.HasValue)
             {
                 if (queryParams.IsMissed.Value)
-                    query = query.Where(g => g.Deadline.HasValue && g.Deadline < DateTime.Now && !g.CompletedAt.HasValue);
+                    query = query.Where(g => g.Deadline.HasValue && g.Deadline < DateTime.UtcNow && !g.CompletedAt.HasValue);
                 else
-                    query = query.Where(g => !g.Deadline.HasValue || g.Deadline >= DateTime.Now || g.CompletedAt.HasValue);
+                    query = query.Where(g => !g.Deadline.HasValue || g.Deadline >= DateTime.UtcNow || g.CompletedAt.HasValue);
             }
 
             // Apply UrgencyLevel filter

@@ -2,6 +2,7 @@ using GoalTracker.Common.Results.Extensions;
 using GoalTracker.DTOs.AuthDtos;
 using GoalTracker.Models;
 using GoalTracker.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace GoalTracker.Controllers
@@ -18,6 +19,7 @@ namespace GoalTracker.Controllers
         }
 
         [HttpPost("register")]
+        [AllowAnonymous]
         public async Task<ActionResult<string>> RegisterAsync([FromBody] RegisterDto registerDto)
         {
             var result = await _authService.RegisterAsync(registerDto);
@@ -31,6 +33,7 @@ namespace GoalTracker.Controllers
         }
 
         [HttpPost("login")]
+        [AllowAnonymous]
         public async Task<ActionResult<string>> LoginAsync([FromBody] LoginDto loginDto)
         {
             var result = await _authService.LoginAsync(loginDto);

@@ -5,7 +5,7 @@
 namespace GoalTracker.Migrations
 {
     /// <inheritdoc />
-    public partial class FixingUrgencyTypoInGoalModel : Migration
+    public partial class FixingUrgencyLevelTypoInGoalModel : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
